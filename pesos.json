@@ -1,0 +1,29 @@
+{
+  "w1": 0.2,
+  "w2": 0.14,
+  "w3": 0.14,
+  "w4": 0.12,
+  "w5": 0.16,
+  "w6": 0.1,
+  "w7": 0.08,
+  "w8": 0.06,
+  "w9": 0.15,
+  "w10": 0.2,
+  "w11": 0.1,
+  "w12": 0.1,
+  "w13": 0.1,
+  "orden": ["w1", "w2", "w3", "w4", "w5", "w9", "w10", "w11", "w12", "w13", "w6", "w7", "w8"],
+  "vector": [0.2, 0.14, 0.14, 0.12, 0.16, 0.15, 0.2, 0.1, 0.1, 0.1, 0.1, 0.08, 0.06],
+  "formula": "w1·crecimiento + w2·diversidad + w3·redundancia + w4·apoyo + w5·densidad + w9·calidad_ingresos + w10·flujo_caja + w11·ratio_efectivo + w12·rotacion_cobrables + w13·empleados − w6·detractores − w7·espías − w8·tensión_capital",
+  "penalizaciones": {
+    "cruce_calidad_caja": 0.2,
+    "caja_divergente": 0.15,
+    "caja_negativo": 0.3,
+    "ratio_bajo": 0.1,
+    "ratio_negativo": 0.25,
+    "cobrables_baja": 0.1,
+    "empleados_desalineado": 0.1
+  },
+  "umbral_trayectoria": 0.05,
+  "fuente": "https://opal-fern-ocean-field.grok.me"
+}
