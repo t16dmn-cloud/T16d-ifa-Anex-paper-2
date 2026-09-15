@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>T16D–Ifá · Paper 3 · Aplicaciones del motor T16D-S</title>
+<style>
+  body { font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.35; max-width: 720px; margin: 36pt auto; color: #111; }
+  h1 { font-size: 16pt; text-align: center; margin-bottom: 6pt; }
+  h2 { font-size: 13pt; text-align: center; font-weight: normal; font-style: italic; margin-top: 0; }
+  h3 { font-size: 12pt; margin-top: 18pt; }
+  .meta { text-align: center; margin: 12pt 0 24pt; }
+  p { text-align: justify; margin: 0 0 10pt; }
+  table { border-collapse: collapse; width: 100%; margin: 12pt 0; font-size: 11pt; }
+  th, td { border: 1px solid #333; padding: 4pt 6pt; vertical-align: top; }
+  pre, code { font-family: Consolas, "Courier New", monospace; font-size: 10pt; }
+  pre { background: #f6f6f6; padding: 10pt; white-space: pre-wrap; }
+  ul, ol { margin-top: 0; }
+</style>
+</head>
+<body>
+<h1>T16D–Ifá · Paper 3</h1>
+<h2>Aplicaciones del motor T16D-S: protocolo, lectura y frontera</h2>
+<p class="meta"><strong>Maikel Núñez</strong> · Programa T16D–Ifá<br>15 de septiembre de 2026</p>
+
+<h3>Resumen</h3>
+<p>El Paper 1 fija el álgebra: ⟨R, G, S⟩ ≅ SmallGroup(16,11) ≅ C₂ × D₄, realizado en el byte por R = rot₈(·,2), G = inv₈, S = rev₈. El Paper 2 fija la gramática: una firma sobre {0,1}⁸, órbita, conjugación S y un score de trece pesos. Este Paper 3 no demuestra ni lo uno ni lo otro. Dice cómo se aplica el instrumento, qué sale de evaluar(firma), y qué no se puede afirmar todavía.</p>
+<p>El motor no predice un precio. No detecta fraude. Recibe una firma, aterriza en un vértice del cubo y pregunta dos cosas: en qué órbita cae el cuerpo, y si las dos piernas se desmienten por cruce o por conciliación.</p>
+<p><strong>Palabras clave:</strong> T16D-S, SmallGroup(16,11), conjugación S, firma estructural, veredicto de coherencia.</p>
+
+<h3>1. Qué cierra este paper</h3>
+<p>Tres piezas, tres funciones:</p>
+<table>
+<tr><th>paper</th><th>función</th><th>lo que no hace</th></tr>
+<tr><td>Paper 1</td><td>existencia y presentación del grupo; Rama D de orden 16; firma 2 D₄ + 12 C₂ + 2 V₄; Rama I explota</td><td>no lee un 10-K</td></tr>
+<tr><td>Paper 2</td><td>gramática de la firma, score, veredicto, grafo 256/342</td><td>no es un panel estadístico</td></tr>
+<tr><td>Paper 3</td><td>protocolo de aplicación y frontera de lectura</td><td>no inventa nodos para cuerpos no firmados</td></tr>
+</table>
+<p>El ciclo publicable no está cerrado mientras los textos de los Papers 1 y 2 no estén depositados junto a sus anexos. Este documento solo cubre la tercera pata: aplicación.</p>
+<p>Código canónico. Anexo Paper 1: paper1_rama_d.py. Anexo Paper 2: motor.py, motor_inercia.py, grafo.json, pesos.json. Repositorio: https://github.com/t16dmn-cloud/T16d-ifa-Anex-paper-2</p>
+
+<h3>2. El instrumento que se aplica</h3>
+<p>Una firma es un diccionario de marcas categóricas del protocolo del app. Las claves usadas son valoracion, crecimiento, capex, calidad, flujoCaja, ratioEfectivo, rotacionCobrables, empleadosIngresos, rotacion, exposicion, diversidad, redundancia, apoyo, detractores, fuerza, espias, fondos, nombre.</p>
+<p>Las que faltan toman el default del motor. La semilla de 8 bits se arma solo con marcas estructurales. Calidad, flujo y conciliación no mueven el nodo: mueven el score.</p>
+<p>evaluar(firma) devuelve, entre otros campos: nodo, bits, score, histórica, proyectada, veredicto, órbita, aritmética, semilla, conjugación_coherente, incongruencia_conciliacion, cruce_calidad_caja.</p>
+<p>Veredicto. «incongruente» si hay cruce calidad × caja, o si hay dos o más flags de conciliación (ratio bajo/negativo, cobrables baja, empleados desalineado). «coherente» en cualquier otro caso.</p>
+<p>La conjugación algebraica S² = 1 se cumple en los 256 vértices por construcción. El veredicto semántico no es ese test: es la falla de las piernas bajo las reglas de cruce y conciliación.</p>
+<p>Score (campo formula de pesos.json):</p>
+<pre>w1·crecimiento + w2·diversidad + w3·redundancia + w4·apoyo + w5·densidad
++ w9·calidad_ingresos + w10·flujo_caja + w11·ratio_efectivo
++ w12·rotacion_cobrables + w13·empleados
+− w6·detractores − w7·espías − w8·tensión_capital</pre>
+<p>Vector, en el orden del campo orden: w = (0.2, 0.14, 0.14, 0.12, 0.16, 0.15, 0.2, 0.1, 0.1, 0.1, 0.1, 0.08, 0.06). Umbral de trayectoria: 0.05. Score &gt; 0.05 → histórica ascendente. Score &lt; −0.05 → descendente. El resto, estable.</p>
+
+<h3>3. Protocolo de lectura de un cuerpo</h3>
+<p>Aplicar el motor a un emisor —una compañía, un fondo, un estado— es un acto de codificación, no de oráculo. El protocolo tiene cuatro pasos.</p>
+<p><strong>Paso 1. Separar las piernas.</strong> Pierna derecha R: lo que el cuerpo declara (valoración, crecimiento, calidad, plantilla). Pierna izquierda L: lo que el cuerpo sostiene (caja, flujo, cobrables, ratio). S intercambia las piernas: S(L,R) = (rev₄(R), rev₄(L)) ≡ rev₈.</p>
+<p><strong>Paso 2. Traducir el 10-K (o el estado equivalente) a marcas categóricas.</strong> Cada clave toma un valor del vocabulario del app (acelerado, declarada, alineado, divergente, bajo, …). La traducción es una decisión del lector. Dos lectores honestos pueden discrepar en una marca. El paper no resuelve esa disputa: exige que la firma quede escrita y fechada.</p>
+<p><strong>Paso 3. Correr evaluar.</strong> El motor elige el nodo activo dentro de la órbita de la semilla, ranking por score, grado, proximidad de Hamming a la semilla y proximidad de peso.</p>
+<p><strong>Paso 4. Leer el veredicto como gramática, no como sentencia.</strong> «coherente» no significa «sano». Significa: bajo las reglas de cruce y conciliación, las piernas no se desmienten. «incongruente» no significa «fraude». Significa: las piernas se desmienten.</p>
+
+<h3>4. Ejemplo runnable (anexo Paper 2, §7)</h3>
+<p>Desde el directorio del anexo:</p>
+<pre>from motor import evaluar, conjugar
+
+print(conjugar(23))
+r = evaluar({
+    "crecimiento": "acelerado",
+    "calidad": "declarada",
+    "flujoCaja": "alineado",
+})
+print(r["nodo"], r["score"], r["veredicto"], r["histórica"])</pre>
+<p>Salida verificada el 15 de septiembre de 2026 sobre el commit del anexo: conjugar(23) = 232; nodo activo 74; score ≈ 0.901; veredicto coherente; histórica ascendente.</p>
+<p>Ese ejemplo no es una empresa. Es una firma mínima: crecimiento acelerado, calidad declarada, caja alineada, el resto en default. Sirve para que un revisor reproduzca el instrumento, no para tasar un ticker.</p>
+<p>El mismo motor, con cruce calidad × caja o con dos flags de conciliación, devuelve incongruente. Eso también es reproducible y no asigna un nombre propio.</p>
+
+<h3>5. Palantir como anotación cerrada</h3>
+<p>El anexo del Paper 2 registra una anotación del motor desplegado (https://opal-fern-ocean-field.grok.me), fechada el 15 de septiembre de 2026, sobre cerrado: score 0.866 para Palantir. Ese número no se reimprime aquí como recálculo del puerto Python. El anexo lo dice con claridad: este material no afirma que el puerto reproduzca 0.866.</p>
+<p>Lo que sí afirma este paper. Uno: existe un instrumento desplegado y un puerto Python del mismo clasificador. Dos: la anotación de Palantir pertenece al instrumento desplegado, no al anexo. Tres: que Palantir acierte o falle no cambia el álgebra del Paper 1. Cambia la confianza en esta lectura.</p>
+<p>No se publica aquí la firma categórica completa que produjo esa anotación. Sin esa firma, nadie puede auditar el 0.866 desde evaluar(). Eso es una laguna de aplicación, no un resultado.</p>
+
+<h3>6. Casos que este paper no asigna</h3>
+<p>El cuerpo del Paper 2 no asigna nodos ni scores a Wirecard, Luckin, Theranos ni Monster. Este Paper 3 tampoco.</p>
+<p>Nombrar esos cuerpos sirve solo para marcar el tipo de pregunta que un estudio de aplicación tendría que hacer: si la pierna declarada (calidad, crecimiento) se sostiene en caja y cobrables, o se desmiente; y cuántos flags de conciliación habría que marcar, con qué fecha de 10-K.</p>
+<p>Hasta que alguien escriba la firma, feche el documento fuente y corra evaluar, no hay nodo. Inventar el nodo para «demostrar» que el motor «caza fraudes» sería exactamente lo que el anexo prohíbe.</p>
+<p>Tampoco se afirma que el motor detecte fraude; que pronostique precio; que n = 5 sea estadística; ni que una órbita de tamaño 8 sea un rating.</p>
+
+<h3>7. Qué haría falta para un estudio de aplicación</h3>
+<p>Un Paper 3 empírico —distinto de este protocolo— exigiría, como mínimo:</p>
+<ol>
+<li>Un panel de emisores con 10-K (o equivalente) fechado.</li>
+<li>Una firma escrita por emisor, con regla de código visible para cada marca.</li>
+<li>Doble lectura independiente de un subconjunto, para medir desacuerdo entre codificadores.</li>
+<li>Salida cruda de evaluar por emisor: nodo, órbita, score, veredicto, flags.</li>
+<li>Un desenlace posterior —impago, restatement, fraude adjudicado, supervivencia— que no entre en la firma.</li>
+<li>La admisión de que el veredicto es una etiqueta gramatical, no una probabilidad.</li>
+</ol>
+<p>Sin esos seis puntos, lo que hay es instrumento + protocolo. No hay validación.</p>
+
+<h3>8. Conclusión</h3>
+<p>El trabajo T16D–Ifá, para publicarse como ciclo, necesita tres textos y dos anexos. Los anexos ya están en GitHub. Este Paper 3 deja escrito el modo de uso: se firma un cuerpo; se corre evaluar; se lee órbita, conjugación y veredicto; no se finge un panel que no existe.</p>
+<p>La aplicación honesta del motor es estrecha. Esa estrechez es la condición para que el álgebra del Paper 1 y la gramática del Paper 2 sobrevivan a la primera lectura hostil.</p>
+
+<h3>Referencias de trabajo</h3>
+<p>Núñez, M. T16D–Ifá · Paper 1 · Rama D. Anexo computacional: paper1_rama_d.py.</p>
+<p>Núñez, M. T16D–Ifá · Paper 2 · Gramática y motor T16D-S. Anexo: ANEXO_NOTA.md, motor.py, grafo.json, pesos.json.</p>
+<p>Repositorio: https://github.com/t16dmn-cloud/T16d-ifa-Anex-paper-2</p>
+<p>Instrumento desplegado: https://opal-fern-ocean-field.grok.me</p>
+<p>Programa T16D–Ifá · Paper 3 · aplicaciones · fin</p>
+</body>
+</html>
