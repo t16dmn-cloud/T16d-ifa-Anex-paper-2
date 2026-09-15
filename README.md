@@ -2,8 +2,14 @@
 
 Puerto Python del clasificador en https://opal-fern-ocean-field.grok.me
 
-256 nodos, 342 aristas, ⟨R, G, S⟩ ≅ SmallGroup(16,11), partición 2 D₄ + 12 C₂ + 2 V₄.
-No es oráculo. Clasifica una firma sobre {0,1}⁸: órbita, conjugación S, score.
+256 nodos, 342 aristas. El grupo de la escritura es ⟨R, G, S⟩ ≅ SmallGroup(16,11) ≅ C₂ × D₄, realizado en `paper1_rama_d.py` (Rama D). Firma bajo corte pierna-fija: 2 D₄ + 12 C₂ + 2 V₄.
+
+No es oráculo. Clasifica una firma sobre {0,1}⁸: órbita, conjugación, score.
+
+Nombres (ver `REALIZACION.md`):
+- **S** = intercambio de piernas.
+- **σ** = `rev8` = G∘R∘S. Es lo que corre `conjugar()`.
+- **C** = complemento (`inv8`). Operador afín externo. No es G.
 
 ## Instalación
 
@@ -24,19 +30,23 @@ r = evaluar({
     "flujoCaja": "alineado",
 })
 r["nodo"], r["score"], r["histórica"], r["proyectada"], r["veredicto"], r["órbita"]
-conjugar(r["nodo"])   # S(L,R) = (rev4(R), rev4(L))
+conjugar(r["nodo"])   # σ = rev8 = G∘R∘S; conjugar(23) = 232
 ```
 
-`evaluar(firma)` recibe un diccionario de parámetros y devuelve nodo, score, histórica, proyectada, veredicto, órbita y aritmética de posición.
+`evaluar(firma)` recibe un diccionario y devuelve nodo, score, histórica, proyectada, veredicto, órbita y aritmética de posición.
 
 Veredicto = `incongruente` si hay cruce calidad × caja, o si ≥2 flags de conciliación (ratio bajo/negativo, cobrables baja, empleados desalineado). Si no, `coherente`.
 
 ## Archivos
 
-- `motor.py` — grupo, conjugación S, score, `evaluar`
+- `paper1_rama_d.py` — Anexo Paper 1 (Rama D)
+- `ANEXO_NOTA.md` — Anexo Paper 2
+- `REALIZACION.md` — nombres canónicos
+- `ANEXO_ALGEBRA.md` — errata
+- `motor.py` / `motor_inercia.py` — puerto del app
 - `grafo.json` — 256 nodos, 342 aristas extraídos del app
 - `pesos.json` — w1…w13 y penalizaciones
-- `README.md` — este archivo
+- `Paper3_T16D_Aplicaciones.md` — protocolo de aplicación
 
 ## Score
 
