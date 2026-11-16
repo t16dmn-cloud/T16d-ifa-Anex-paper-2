@@ -1,4 +1,4 @@
-# T16D–Ifá · Paper 1 · 15 septiembre 2026
+# T16D–Ifá · Paper 1 · 16 noviembre 2026
 
 **PROGRAMA T16D–IFÁ**  
 El cubo {0,1}⁸ de Ifá bajo ⟨R, G, S⟩ ≅ C₂ × D₄: W de peso 4, 34 órbitas y unicidad acotada
@@ -31,11 +31,16 @@ Firma bajo corte pierna-fija: 2 D₄ + 12 C₂ + 2 V₄.
 W = 70 estados, 10 órbitas (tamaños 2,2,2,4,4,8,8,8,16,16), 0 fijos en W.
 Fix V = {Eyiogbe, Z}. 34 órbitas en V.
 
-## Frontera
+## Frontera explícita (actualizada 16 nov 2026)
 
-Afirma el grupo, la firma, 34, W/10, los dos polos.
-No afirma κ, F, carrier físico, que los polos vivan en W, ni 15+8 como conteo independiente.
+Afirma el grupo, la firma, 34, W/10, los dos polos, y la realización canónica en paper1_rama_d.py.
 
-Errata: la primera emisión mezclaba Z y Eyiogbe con W.
+No afirma:
+- κ, F, carrier físico, escala energética, o mapeo a magnitudes medibles.
+- Que los polos vivan en W.
+- 15+8 como conteo independiente.
+- Que el motor de inercia (rev8) sea la S de la escritura; el motor usa σ = GRS = rev8.
+
+Errata incorporada: la primera emisión mezclaba Z y Eyiogbe con W. Queda corregido. Nombres unificados: R, G, S solo para Rama D; complemento = complemento; rev8 = espejo del app / σ.
 
 Programa T16D–Ifá · Paper 1 · fin
